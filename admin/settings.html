@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — Iraiva Ministries Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="auth.js"></script>
+<link rel="icon" type="image/webp" href="../assets/images/iraiva-logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="settings.css">
+</head>
+<body class="admin-body">
+
+<div class="admin-shell" id="adminShell">
+
+  <!-- ============ SIDEBAR (unchanged from STEP 4A dashboard shell) ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="../assets/images/iraiva-logo.webp" alt="Iraiva Ministries logo">
+      <div class="sidebar-brand-text">
+        <strong>IRAIVA MINISTRIES</strong>
+        <small>LYRICS LIBRARY ADMIN</small>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Admin navigation">
+      <a class="nav-item" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="albums.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="M21 15l-5-5-9 9"/></svg>
+        <span>Albums</span>
+      </a>
+      <a class="nav-item" href="songs.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+        <span>Songs &amp; Lyrics</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        <span>Audio Library</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+        <span>Documents</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 010 18"/><path d="M12 3a13 13 0 000 18"/></svg>
+        <span>Languages</span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/></svg>
+        <span>Homepage</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.6-9.5-9C.6 8.2 2.4 5 5.8 5c1.9 0 3.3 1 4.2 2.3C11 6 12.4 5 14.3 5c3.4 0 5.2 3.2 3.3 7-2.5 4.4-9.5 9-9.5 9z"/></svg>
+        <span>Ministries</span>
+      </a>
+      <a class="nav-item" href="requests.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span>Song Requests</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-4-9 8"/></svg>
+        <span>Media Library</span>
+      </a>
+      <a class="nav-item active" href="settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="sidebar-profile" href="#">
+        <span class="sidebar-avatar">A</span>
+        <span class="sidebar-profile-text">
+          <strong>Admin</strong>
+          <small>Super Admin</small>
+        </span>
+      </a>
+      <button class="logout-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main-wrap">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        </button>
+        <button class="menu-btn" id="collapseBtn" aria-label="Collapse sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+        </button>
+        <div class="topbar-welcome">
+          <strong>Settings</strong>
+          <small>Tuesday, 19 August 2026</small>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <label class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" placeholder="Search songs, albums…">
+        </label>
+        <button class="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+          <span class="badge-dot"></span>
+        </button>
+        <a class="topbar-profile" href="#">
+          <span class="sidebar-avatar">A</span>
+          <span class="topbar-profile-text">
+            <strong>Admin</strong>
+            <small>Super Admin</small>
+          </span>
+        </a>
+      </div>
+    </header>
+
+    <main class="admin-content">
+
+      <div class="page-heading">
+        <h1>Settings</h1>
+        <p>Basic website information and social links used across the public site.</p>
+      </div>
+
+      <form id="settingsForm" novalidate>
+
+        <!-- ============ BASIC WEBSITE SETTINGS ============ -->
+        <section class="dash-section" aria-label="Basic website settings">
+          <div class="section-head"><h2>Website Settings</h2></div>
+          <div class="panel">
+            <div class="form-grid">
+              <div class="form-group span-2">
+                <label class="form-label" for="siteName">Website / Ministry Name</label>
+                <input class="form-input" type="text" id="siteName" name="siteName" placeholder="e.g. Iraiva Ministries" maxlength="80">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contactEmail">Contact Email</label>
+                <input class="form-input" type="email" id="contactEmail" name="contactEmail" placeholder="info@example.org">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contactPhone">Contact Phone</label>
+                <input class="form-input" type="text" id="contactPhone" name="contactPhone" placeholder="+91 12345 67890">
+              </div>
+              <div class="form-group span-2">
+                <label class="form-label" for="siteLocation">Location</label>
+                <input class="form-input" type="text" id="siteLocation" name="location" placeholder="City, State, Country">
+              </div>
+              <div class="form-group span-2">
+                <label class="form-label" for="footerCopyright">Footer Copyright Text</label>
+                <input class="form-input" type="text" id="footerCopyright" name="footerCopyright" placeholder="e.g. Iraiva Ministries. All Rights Reserved.">
+                <span class="form-hint">Shown after the © year in the public site footer.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SOCIAL LINKS ============ -->
+        <section class="dash-section" aria-label="Social links">
+          <div class="section-head"><h2>Social Links</h2></div>
+          <div class="panel">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="socialFacebook">Facebook</label>
+                <input class="form-input" type="url" id="socialFacebook" name="socialFacebook" placeholder="https://facebook.com/yourpage">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="socialInstagram">Instagram</label>
+                <input class="form-input" type="url" id="socialInstagram" name="socialInstagram" placeholder="https://instagram.com/yourpage">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="socialYoutube">YouTube</label>
+                <input class="form-input" type="url" id="socialYoutube" name="socialYoutube" placeholder="https://youtube.com/@yourchannel">
+              </div>
+            </div>
+            <p class="form-hint settings-optional-hint">Optional — leave blank to keep the current link on the public site.</p>
+          </div>
+        </section>
+
+        <!-- ============ SAVE BAR ============ -->
+        <div class="settings-save-bar">
+          <button type="submit" class="btn btn-primary" id="settingsSaveBtn">Save Settings</button>
+        </div>
+
+      </form>
+
+      <footer class="admin-footer">
+        <span>© <span id="footerYear">2026</span> Iraiva Ministries. All rights reserved.</span>
+        <span>Version 1.0.0</span>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="admin.js"></script>
+<script src="../assets/js/settings-data.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>

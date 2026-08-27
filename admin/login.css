@@ -1,0 +1,207 @@
+/* ==========================================================================
+   IRAIVA MINISTRIES — ADMIN LOGIN
+   login.css
+   Reuses the admin dashboard's brand tokens (defined in admin.css) and adds
+   a gold accent for the login screen only. Does not touch dashboard styles.
+   ========================================================================== */
+
+:root {
+  --gold: #C9A24B;
+  --gold-light: #E4C877;
+}
+
+.login-body {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-page {
+  width: 100%;
+  max-width: 440px;
+}
+
+.login-card {
+  position: relative;
+  background: var(--surface-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+  padding: 44px 40px 36px;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--red) 0%, var(--gold) 50%, var(--red) 100%);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.login-brand img {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--gold);
+}
+
+.login-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.login-brand-text strong {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--text-hi);
+}
+
+.login-brand-text small {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--gold-light);
+}
+
+.login-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-hi);
+  margin-bottom: 6px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: var(--text-mid);
+  margin-bottom: 30px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-group label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-mid);
+}
+
+.field-group input {
+  width: 100%;
+  background: var(--surface-0);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  padding: 13px 15px;
+  font-size: 14.5px;
+  color: var(--text-hi);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.field-group input::placeholder { color: var(--text-low); }
+
+.field-group input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 162, 75, 0.18);
+}
+
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrap input { padding-right: 46px; }
+
+.toggle-password {
+  position: absolute;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  color: var(--text-low);
+  transition: color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.toggle-password:hover { color: var(--gold-light); background: rgba(255,255,255,0.04); }
+.toggle-password svg { width: 18px; height: 18px; stroke: currentColor; }
+.toggle-password .icon-eye-off { display: none; }
+.toggle-password.is-visible .icon-eye { display: none; }
+.toggle-password.is-visible .icon-eye-off { display: block; }
+
+.login-error {
+  display: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--red-light);
+  background: rgba(196, 30, 38, 0.12);
+  border: 1px solid rgba(196, 30, 38, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 13px;
+}
+
+.login-error.visible { display: block; }
+
+.login-submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+  color: var(--white);
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: var(--glow-red);
+  transition: transform 0.15s var(--ease), box-shadow 0.2s var(--ease), filter 0.2s var(--ease);
+}
+
+.login-submit:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.login-submit:active { transform: translateY(0); }
+
+.login-footnote {
+  margin-top: 26px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-low);
+}
+
+@keyframes loginShake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.login-form.shake { animation: loginShake 0.5s var(--ease); }
+
+@media (max-width: 480px) {
+  .login-card { padding: 34px 24px 28px; }
+  .login-title { font-size: 26px; }
+}

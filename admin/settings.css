@@ -1,0 +1,104 @@
+/* ==========================================================================
+   IRAIVA MINISTRIES — ADMIN DASHBOARD
+   admin/settings.css
+
+   STEP 4B7 SCOPE ONLY — MINIMAL ADMIN SETTINGS
+   --------------------------------------------------------------------------
+   Additive stylesheet loaded AFTER admin.css, following the exact same
+   pattern as albums.css / requests.css: it reuses admin.css's design tokens
+   and shell classes as-is, and only adds the component classes needed for
+   this page (form fields, save bar, toasts). admin.css itself is never
+   modified.
+   ========================================================================== */
+
+/* ---------- BUTTONS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn svg { width: 16px; height: 16px; stroke: currentColor; flex-shrink: 0; }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  color: var(--white);
+  background: linear-gradient(160deg, var(--red), var(--red-dark));
+  box-shadow: 0 6px 16px rgba(196, 30, 38, 0.3);
+}
+.btn-primary:hover { box-shadow: 0 8px 22px rgba(196, 30, 38, 0.42); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; box-shadow: none; transform: none; cursor: default; }
+
+/* ---------- FORMS ---------- */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; }
+.form-group { display: flex; flex-direction: column; gap: 7px; }
+.form-group.span-2 { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 700; color: var(--text-mid); letter-spacing: 0.01em; }
+.form-hint { font-size: 11px; color: var(--text-low); }
+.settings-optional-hint { margin-top: 14px; }
+
+.form-input {
+  width: 100%;
+  background: var(--surface-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  font-size: 13.5px;
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.form-input::placeholder { color: var(--text-low); }
+.form-input:focus {
+  outline: none;
+  border-color: var(--red-light);
+  box-shadow: 0 0 0 3px rgba(196,30,38,0.18);
+}
+
+/* ---------- SAVE BAR ---------- */
+.settings-save-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* ---------- TOASTS ---------- */
+.toast-stack {
+  position: fixed;
+  right: 22px; bottom: 22px;
+  z-index: 700;
+  display: flex; flex-direction: column; gap: 10px;
+  max-width: min(340px, calc(100vw - 32px));
+}
+.toast {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  padding: 13px 15px;
+  box-shadow: var(--shadow-lift);
+  font-size: 13px;
+  color: var(--text-hi);
+  animation: toast-in 0.25s var(--ease);
+}
+.toast.success { border-left: 3px solid #5FBF7A; }
+.toast.error { border-left: 3px solid var(--red-light); }
+.toast svg { width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; }
+.toast.success svg { stroke: #8FE0A8; }
+.toast.error svg { stroke: #F2989C; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
