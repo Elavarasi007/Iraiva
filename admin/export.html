@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Export Tool — Iraiva Ministries Admin</title>
+<meta name="robots" content="noindex, nofollow">
+
+<!--
+  ==========================================================================
+  IRAIVA MINISTRIES — ADMIN DASHBOARD
+  admin/export.html
+
+  STEP 2 SCOPE ONLY — READ-ONLY MIGRATION EXPORT TOOL
+  --------------------------------------------------------------------------
+  This page does NOT modify any existing file, and does NOT modify or
+  delete anything in localStorage or IndexedDB. It only READS:
+
+    - localStorage["iraivaAdmin.songs.v1"]
+    - localStorage["iraivaAdmin.albums.v1"]
+    - IndexedDB "iraivaAudioDB" (object store "audioFiles")
+
+  ...and assembles a single downloadable JSON "export bundle" containing
+  everything needed for a later Supabase migration (Step 3+), which has
+  NOT been built yet. No network calls are made anywhere in this file —
+  view the Network tab if you want to confirm that yourself.
+
+  This is a brand-new, standalone page. It is not linked from the existing
+  dashboard navigation and does not alter admin/index.html, admin/songs.js,
+  admin/albums.js, admin/songs-data.js, admin/albums-data.js, or any other
+  existing file in this project.
+  ==========================================================================
+-->
+
+<style>
+  :root {
+    --red: #C41E26;
+    --red-dark: #8B1218;
+    --red-light: #E63946;
+    --black: #131212;
+    --surface-0: #0E0D0D;
+    --surface-1: #171515;
+    --surface-2: #1E1C1C;
+    --surface-3: #262323;
+    --hairline: rgba(255, 255, 255, 0.08);
+    --hairline-strong: rgba(255, 255, 255, 0.14);
+    --text-hi: #F7F5F2;
+    --text-mid: rgba(247, 245, 242, 0.68);
+    --text-low: rgba(247, 245, 242, 0.42);
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --good: #3FBE6A;
+    --warn: #E6A23C;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface-0);
+    color: var(--text-hi);
+    font-family: var(--font-body);
+    line-height: 1.5;
+    padding: 32px 20px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--red-light);
+    background: rgba(196,30,38,0.12);
+    border: 1px solid rgba(196,30,38,0.35);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 34px;
+    margin: 0 0 6px;
+    color: var(--text-hi);
+  }
+  .sub { color: var(--text-mid); margin: 0 0 28px; font-size: 15px; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-mid);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+  .notice {
+    background: rgba(63,190,106,0.08);
+    border: 1px solid rgba(63,190,106,0.3);
+    color: var(--text-hi);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .notice strong { color: var(--good); }
+  ul.readonly-list { margin: 8px 0 0; padding-left: 20px; color: var(--text-mid); font-size: 14px; }
+  ul.readonly-list li { margin-bottom: 4px; }
+  button.primary {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 13px 22px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button.primary:hover { background: var(--red-dark); }
+  button.primary:disabled { background: var(--surface-3); color: var(--text-low); cursor: not-allowed; }
+  button.secondary {
+    background: var(--surface-3);
+    color: var(--text-hi);
+    border: 1px solid var(--hairline-strong);
+    padding: 13px 22px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.secondary:disabled { color: var(--text-low); cursor: not-allowed; }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .stat {
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+  }
+  .stat .n { font-size: 26px; font-weight: 700; font-family: var(--font-display); color: var(--text-hi); }
+  .stat .l { font-size: 12px; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+  .stat.ok .n { color: var(--good); }
+  .stat.warn .n { color: var(--warn); }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 14px; }
+  table th, table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--hairline); }
+  table th { color: var(--text-mid); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table td { color: var(--text-hi); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+  .pill.yes { background: rgba(63,190,106,0.15); color: var(--good); }
+  .pill.no { background: rgba(255,255,255,0.06); color: var(--text-low); }
+  .log {
+    background: var(--surface-0);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--text-mid);
+    max-height: 220px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    margin-top: 14px;
+  }
+  a.back { color: var(--text-mid); font-size: 13px; text-decoration: none; }
+  a.back:hover { color: var(--text-hi); }
+  .hidden { display: none !important; }
+  .footnote { font-size: 12.5px; color: var(--text-low); margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Back to Dashboard</a>
+  <div style="height:14px"></div>
+  <span class="badge">Step 2 &middot; Read-only</span>
+  <h1>Data Export Tool</h1>
+  <p class="sub">
+    Reads your existing Dashboard data exactly as it is right now and packages it into one downloadable file, so it can later be verified and migrated to permanent online storage. Nothing on this page writes, changes, or deletes anything.
+  </p>
+
+  <div class="notice">
+    <strong>This tool is 100% read-only.</strong> It only reads from:
+    <ul class="readonly-list">
+      <li><code>localStorage["iraivaAdmin.songs.v1"]</code></li>
+      <li><code>localStorage["iraivaAdmin.albums.v1"]</code></li>
+      <li><code>IndexedDB "iraivaAudioDB"</code> (store <code>audioFiles</code>)</li>
+    </ul>
+    It never calls <code>.removeItem()</code>, <code>.clear()</code>, <code>.delete()</code>, or any Supabase/network endpoint. Your original browser data is left exactly as it is, whether or not you run an export.
+  </div>
+
+  <div class="card">
+    <h2>Run Export</h2>
+    <p class="sub" style="margin-bottom:16px;">
+      Open this page on the <strong>same browser and device/profile</strong> where you actually use the live Dashboard to add/edit songs and albums — that's the only place this real data exists. Then click below.
+    </p>
+    <div class="btn-row">
+      <button id="runBtn" class="primary">Run Export Scan</button>
+      <button id="downloadBtn" class="secondary" disabled>Download Export Bundle (.json)</button>
+    </div>
+    <div id="log" class="log hidden"></div>
+  </div>
+
+  <div id="summaryCard" class="card hidden">
+    <h2>Verification Summary</h2>
+    <div class="grid" id="statGrid"></div>
+    <div style="height:18px"></div>
+    <table id="docTable">
+      <thead><tr><th>Document type</th><th>Songs with it</th><th>Uploaded via Dashboard</th><th>Legacy static path</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="footnote" id="fallbackNote"></p>
+  </div>
+
+  <div id="detailCard" class="card hidden">
+    <h2>Songs Included (order preserved)</h2>
+    <table>
+      <thead><tr><th>#</th><th>ID</th><th>Title</th><th>Album ID</th><th>Audio</th><th>Lyrics lines</th><th>Timed lines</th></tr></thead>
+      <tbody id="songRows"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SONGS_KEY = "iraivaAdmin.songs.v1";
+  var ALBUMS_KEY = "iraivaAdmin.albums.v1";
+  var AUDIO_DB_NAME = "iraivaAudioDB";
+  var AUDIO_STORE = "audioFiles";
+
+  var logEl = document.getElementById("log");
+  var runBtn = document.getElementById("runBtn");
+  var downloadBtn = document.getElementById("downloadBtn");
+  var summaryCard = document.getElementById("summaryCard");
+  var detailCard = document.getElementById("detailCard");
+
+  var exportBundle = null; // built once per run, only ever read for download
+
+  function log(msg) {
+    logEl.classList.remove("hidden");
+    logEl.textContent += (logEl.textContent ? "\n" : "") + msg;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  /* ---------- READ-ONLY localStorage access ---------- */
+  function readLocalStorageArray(key) {
+    try {
+      var raw = window.localStorage.getItem(key); // read-only: getItem
+      if (!raw) return { found: false, data: null };
+      var parsed = JSON.parse(raw);
+      return { found: true, data: Array.isArray(parsed) ? parsed : null };
+    } catch (err) {
+      log("Warning: could not parse " + key + " — " + err.message);
+      return { found: true, data: null, error: String(err.message || err) };
+    }
+  }
+
+  /* ---------- READ-ONLY IndexedDB access ---------- */
+  function openAudioDBReadOnly() {
+    return new Promise(function (resolve, reject) {
+      if (!window.indexedDB) { resolve(null); return; }
+      // NOTE: no explicit version passed — this opens whatever version
+      // already exists without triggering onupgradeneeded, so the schema
+      // is never touched by this page.
+      var req = window.indexedDB.open(AUDIO_DB_NAME);
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { resolve(null); }; // DB may simply not exist yet — not an error for export purposes
+      req.onblocked = function () { resolve(null); };
+    });
+  }
+
+  function readAllAudioBlobs(db) {
+    return new Promise(function (resolve) {
+      if (!db || !db.objectStoreNames.contains(AUDIO_STORE)) { resolve({}); return; }
+      try {
+        var tx = db.transaction(AUDIO_STORE, "readonly");
+        var store = tx.objectStore(AUDIO_STORE);
+        var keysReq = store.getAllKeys();
+        var valsReq = store.getAll();
+        var result = {};
+        tx.oncomplete = function () {
+          var keys = keysReq.result || [];
+          var vals = valsReq.result || [];
+          for (var i = 0; i < keys.length; i++) {
+            result[keys[i]] = vals[i];
+          }
+          resolve(result);
+        };
+        tx.onerror = function () { resolve({}); };
+      } catch (err) {
+        resolve({});
+      }
+    });
+  }
+
+  function blobToBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        // reader.result is a full data: URL — keep only the base64 payload,
+        // mime type is captured separately from the Blob itself.
+        var result = String(reader.result || "");
+        var comma = result.indexOf(",");
+        resolve(comma !== -1 ? result.slice(comma + 1) : result);
+      };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function bytesToSize(bytes) {
+    if (!bytes) return "0 B";
+    var units = ["B", "KB", "MB", "GB"];
+    var i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : 1) + " " + units[i];
+  }
+
+  async function runExport() {
+    runBtn.disabled = true;
+    downloadBtn.disabled = true;
+    exportBundle = null;
+    logEl.textContent = "";
+    summaryCard.classList.add("hidden");
+    detailCard.classList.add("hidden");
+
+    log("Starting read-only scan...");
+
+    /* ---- songs ---- */
+    var songsResult = readLocalStorageArray(SONGS_KEY);
+    if (songsResult.found && songsResult.data) {
+      log("Found " + songsResult.data.length + " song(s) in localStorage[\"" + SONGS_KEY + "\"].");
+    } else if (songsResult.found) {
+      log("localStorage[\"" + SONGS_KEY + "\"] exists but could not be parsed as an array. No songs will be included.");
+    } else {
+      log("No localStorage[\"" + SONGS_KEY + "\"] record found — the Dashboard may never have been opened on this browser, or this is not the right browser/device.");
+    }
+    var songs = (songsResult.found && songsResult.data) ? songsResult.data : [];
+
+    /* ---- albums ---- */
+    var albumsResult = readLocalStorageArray(ALBUMS_KEY);
+    if (albumsResult.found && albumsResult.data) {
+      log("Found " + albumsResult.data.length + " album(s) in localStorage[\"" + ALBUMS_KEY + "\"].");
+    } else if (albumsResult.found) {
+      log("localStorage[\"" + ALBUMS_KEY + "\"] exists but could not be parsed as an array. No albums will be included.");
+    } else {
+      log("No localStorage[\"" + ALBUMS_KEY + "\"] record found.");
+    }
+    var albums = (albumsResult.found && albumsResult.data) ? albumsResult.data : [];
+
+    /* ---- audio blobs from IndexedDB ---- */
+    log("Opening IndexedDB \"" + AUDIO_DB_NAME + "\" (read-only, no schema changes)...");
+    var db = await openAudioDBReadOnly();
+    var rawBlobs = await readAllAudioBlobs(db);
+    var blobKeys = Object.keys(rawBlobs);
+    log("Found " + blobKeys.length + " audio blob(s) in IndexedDB.");
+    if (db) db.close();
+
+    /* ---- resolve each song's audio into the export bundle ---- */
+    log("Encoding audio blobs as base64 for portability (this can take a moment for large files)...");
+    var audioBlobsOut = {};
+    var audioEncodeErrors = 0;
+    for (var i = 0; i < blobKeys.length; i++) {
+      var key = blobKeys[i];
+      var blob = rawBlobs[key];
+      if (!blob) continue;
+      try {
+        var base64 = await blobToBase64(blob);
+        audioBlobsOut[key] = {
+          mimeType: blob.type || "application/octet-stream",
+          byteLength: blob.size || 0,
+          base64: base64
+        };
+      } catch (err) {
+        audioEncodeErrors++;
+        log("Could not encode audio blob for key \"" + key + "\": " + (err && err.message ? err.message : err));
+      }
+    }
+    if (audioEncodeErrors) {
+      log("Warning: " + audioEncodeErrors + " audio blob(s) failed to encode. They are left out of the bundle but were NOT modified or deleted in IndexedDB.");
+    }
+
+    /* ---- per-song audio classification (does not alter the song object) ---- */
+    var songDetails = songs.map(function (s, idx) {
+      var audioFile = s.audioFile || "";
+      var audioSourceType = "none";
+      if (audioFile.indexOf("indexeddb:") === 0) {
+        audioSourceType = audioBlobsOut[s.id] ? "indexeddb" : "indexeddb-missing";
+      } else if (audioFile.indexOf("data:") === 0) {
+        audioSourceType = "inline-data-url";
+      } else if (audioFile) {
+        audioSourceType = "static-path";
+      }
+
+      var lyrics = Array.isArray(s.lyrics) ? s.lyrics : [];
+      var timedLines = lyrics.filter(function (l) { return l && typeof l.time === "number"; }).length;
+
+      var docs = s.documents || {};
+      var docInfo = {};
+      ["word", "pdf", "ppt"].forEach(function (t) {
+        var entry = docs[t];
+        if (!entry) { docInfo[t] = { present: false }; return; }
+        var uploaded = !!(entry && typeof entry === "object" && entry.dataUrl);
+        docInfo[t] = { present: true, uploaded: uploaded, path: uploaded ? null : entry };
+      });
+
+      return {
+        order: idx + 1,
+        id: s.id,
+        title: s.title,
+        albumId: s.albumId,
+        audioSourceType: audioSourceType,
+        lyricsLineCount: lyrics.length,
+        timedLineCount: timedLines,
+        docInfo: docInfo
+      };
+    });
+
+    var songsWithAudio = songDetails.filter(function (d) { return d.audioSourceType !== "none"; }).length;
+    var songsWithLyrics = songDetails.filter(function (d) { return d.lyricsLineCount > 0; }).length;
+    var songsWithTimedLyrics = songDetails.filter(function (d) { return d.timedLineCount > 0; }).length;
+
+    var docCounts = { word: { present: 0, uploaded: 0, legacy: 0 }, pdf: { present: 0, uploaded: 0, legacy: 0 }, ppt: { present: 0, uploaded: 0, legacy: 0 } };
+    songDetails.forEach(function (d) {
+      ["word", "pdf", "ppt"].forEach(function (t) {
+        if (d.docInfo[t].present) {
+          docCounts[t].present++;
+          if (d.docInfo[t].uploaded) docCounts[t].uploaded++;
+          else docCounts[t].legacy++;
+        }
+      });
+    });
+
+    var albumsWithCover = albums.filter(function (a) {
+      return !!a.coverImage;
+    }).length;
+    var albumsWithUploadedCover = albums.filter(function (a) {
+      return typeof a.coverImage === "string" && a.coverImage.indexOf("data:") === 0;
+    }).length;
+
+    log("Scan complete.");
+
+    exportBundle = {
+      exportTool: "iraiva-admin-export",
+      exportToolVersion: 1,
+      exportedAt: new Date().toISOString(),
+      sourceUrl: window.location.href,
+      readOnly: true,
+      dataFoundOnThisBrowser: {
+        songsKeyPresent: songsResult.found,
+        albumsKeyPresent: albumsResult.found
+      },
+      albums: albums,
+      songs: songs,
+      audioBlobs: audioBlobsOut,
+      verification: {
+        totalAlbums: albums.length,
+        totalSongs: songs.length,
+        songsWithAudio: songsWithAudio,
+        songsWithLyrics: songsWithLyrics,
+        songsWithTimedLyrics: songsWithTimedLyrics,
+        albumsWithCover: albumsWithCover,
+        albumsWithUploadedCover: albumsWithUploadedCover,
+        documentCounts: docCounts,
+        audioBlobsEncoded: Object.keys(audioBlobsOut).length,
+        audioBlobsFoundInIndexedDB: blobKeys.length
+      },
+      songDetails: songDetails
+    };
+
+    renderSummary(exportBundle, songsResult, albumsResult);
+    downloadBtn.disabled = false;
+    runBtn.disabled = false;
+    log("Ready. Review the summary below, then click \"Download Export Bundle\".");
+  }
+
+  function statBlock(n, label, cls) {
+    var div = document.createElement("div");
+    div.className = "stat" + (cls ? " " + cls : "");
+    div.innerHTML = '<div class="n">' + n + '</div><div class="l">' + label + '</div>';
+    return div;
+  }
+
+  function renderSummary(bundle, songsResult, albumsResult) {
+    var v = bundle.verification;
+    var grid = document.getElementById("statGrid");
+    grid.innerHTML = "";
+    grid.appendChild(statBlock(v.totalAlbums, "Albums"));
+    grid.appendChild(statBlock(v.totalSongs, "Songs"));
+    grid.appendChild(statBlock(v.songsWithAudio, "Songs with audio", "ok"));
+    grid.appendChild(statBlock(v.songsWithLyrics, "Songs with lyrics", "ok"));
+    grid.appendChild(statBlock(v.songsWithTimedLyrics, "Songs with timestamps", "ok"));
+    grid.appendChild(statBlock(v.audioBlobsEncoded + " / " + v.audioBlobsFoundInIndexedDB, "Audio blobs encoded"));
+    grid.appendChild(statBlock(v.albumsWithCover, "Albums with a cover"));
+
+    var tbody = document.querySelector("#docTable tbody");
+    tbody.innerHTML = "";
+    ["word", "pdf", "ppt"].forEach(function (t) {
+      var row = document.createElement("tr");
+      var label = t === "word" ? "Word (.docx)" : t === "pdf" ? "PDF" : "PowerPoint (.pptx)";
+      row.innerHTML = "<td>" + label + "</td><td>" + v.documentCounts[t].present + "</td><td>" + v.documentCounts[t].uploaded + "</td><td>" + v.documentCounts[t].legacy + "</td>";
+      tbody.appendChild(row);
+    });
+
+    var note = document.getElementById("fallbackNote");
+    var notes = [];
+    if (!songsResult.found) notes.push("No admin song record was found on this browser — if you expected real songs here, make sure you're on the correct browser/device/profile where the live Dashboard has actually been used.");
+    if (!albumsResult.found) notes.push("No admin album record was found on this browser.");
+    note.textContent = notes.join(" ");
+
+    var rowsEl = document.getElementById("songRows");
+    rowsEl.innerHTML = "";
+    bundle.songDetails.forEach(function (d) {
+      var tr = document.createElement("tr");
+      var audioPill = d.audioSourceType === "none"
+        ? '<span class="pill no">None</span>'
+        : '<span class="pill yes">' + d.audioSourceType + '</span>';
+      tr.innerHTML =
+        "<td>" + d.order + "</td>" +
+        "<td>" + escapeHtml(d.id) + "</td>" +
+        "<td>" + escapeHtml(d.title || "") + "</td>" +
+        "<td>" + escapeHtml(d.albumId || "") + "</td>" +
+        "<td>" + audioPill + "</td>" +
+        "<td>" + d.lyricsLineCount + "</td>" +
+        "<td>" + d.timedLineCount + "</td>";
+      rowsEl.appendChild(tr);
+    });
+
+    summaryCard.classList.remove("hidden");
+    detailCard.classList.remove("hidden");
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function downloadBundle() {
+    if (!exportBundle) return;
+    var json = JSON.stringify(exportBundle, null, 2);
+    var blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    a.href = url;
+    a.download = "iraiva-export-" + stamp + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+    log("Downloaded bundle as " + a.download + " (" + bytesToSize(json.length) + ").");
+  }
+
+  runBtn.addEventListener("click", function () {
+    runExport().catch(function (err) {
+      log("Export failed: " + (err && err.message ? err.message : err));
+      runBtn.disabled = false;
+    });
+  });
+  downloadBtn.addEventListener("click", downloadBundle);
+})();
+</script>
+</body>
+</html>
